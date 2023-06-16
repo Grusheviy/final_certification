@@ -45,12 +45,17 @@ class NoteManager:
     #     content = input("Введите содержимое заметки")
     #     self.create_note(title, content)
 
+    # def create_note(self, title, content):
+    #     note = Note(title, content)
+    #     self.notes.append(note)
+    #     self.save_notes()
+    #     print('\n',"Заметка успешно создана.")
+    
+    # Для GUI
     def create_note(self, title, content):
         note = Note(title, content)
         self.notes.append(note)
         self.save_notes()
-        # print('\n',"Заметка успешно создана.")
-        
         
 # ЧТЕНИЕ ЗАМЕТКИ
 
