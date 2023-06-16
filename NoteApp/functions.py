@@ -2,6 +2,9 @@ from datetime import datetime
 import PySimpleGUI as sg
 
 
+from datetime import datetime
+
+
 class Note:
     def __init__(self, title, content, created_at=None):
         self.title = title
@@ -23,7 +26,8 @@ class NoteManager:
     def __init__(self, file_path):
         self.file_path = file_path
         self.notes = self.load_notes()
-
+    
+#ФУНКЦИЯ ДЛЯ ЗАГРУЗКИ ЗАМЕТОК
     def load_notes(self):
         try:
             with open(self.file_path, 'r', encoding='utf-8') as file:
@@ -32,17 +36,15 @@ class NoteManager:
         except FileNotFoundError:
             return []
 
+# ФУНКЦИЯ ДЛЯ СОХРАНЕНИЯ ЗАМЕТОК
     def save_notes(self):
         note_strings = [note.to_string() for note in self.notes]
         with open(self.file_path, 'w', encoding='utf-8') as file:
             file.writelines(note_strings)
 
-# СОЗАДИНЕ ЗАМЕТКИ
-
-    # Для консольного вывода
     # def create_note_from_input(self):
     #     title = input("Введите заголовок заметки: ")
-    #     content = input("Введите содержимое заметки")
+    #     content = input("Введите содержимое заметки: ")
     #     self.create_note(title, content)
 
     # def create_note(self, title, content):
@@ -51,41 +53,52 @@ class NoteManager:
     #     self.save_notes()
     #     print('\n',"Заметка успешно создана.")
     
-    # Для GUI
+# ФУНКЦИЯ ДЛЯ СОЗДАНИЯ ЗАМЕТОК ЧЕРЕЗ GUI 
     def create_note(self, title, content):
         note = Note(title, content)
         self.notes.append(note)
         self.save_notes()
         
-# ЧТЕНИЕ ЗАМЕТКИ
-
-    # Для консольного вывода
     # def read_notes(self):
     #     if not self.notes:
     #         print('\n', "Список заметок пуст.")
     #     else:
     #         print("Список заметок:")
     #         for index, note in enumerate(self.notes):
-    #             print('\n', f"{index + 1}. {note.title} ({note.created_at.strftime('%Y-%m-%d %H:%M:%S')})")   
- 
-    # def read_selected_note_from_input(self, note_index):
+    #             print('\n', f"{index + 1}. {note.title} ({note.created_at.strftime('%Y-%m-%d %H:%M:%S')})")
+    
+    # def read_selected_note_from_input(self):
     #     note_index = int(input("Введите индекс заметки для прочтения: "))
-    #     self.read_selected_note(self, note_index)
+    #     self.read_selected_note(note_index)
+    
+    # ФУНКЦИЯ ДЛЯ ВЫВОДА СПИСКА ЗАМЕТОК ЧЕРЕЗ GUI            
+    def get_note_list(self):
+        if not self.notes:
+            return "Список заметок пуст."
+        else:
+            return [f"{note.title} ({note.created_at.strftime('%Y-%m-%d %H:%M:%S')})" for note in self.notes]
 
-    def read_selected_note(self, note_index):
-        if note_index < 1 or note_index > len(self.notes):
-            # print('\n', "Неверный индекс заметки.")
+    # def read_selected_note(self, note_index):
+    #     if note_index < 1 or note_index > len(self.notes):
+    #         print('\n', "Неверный индекс заметки.")
+    #     else:
+    #         note = self.notes[note_index - 1]
+    #         print('\n')
+    #         print(f"Заголовок: {note.title}")
+    #         print(f"Содержимое: {note.content}")
+    #         print(f"Дата создания: {note.created_at.strftime('%Y-%m-%d %H:%M:%S')}")
+            
+
+
+# ФУНКЦИЯ ДЛЯ ЧТЕНИЯ ВЫБРАНОЙ ЗАМЕТКИ ЧЕРЕЗ GUI
+def read_selected_note_from_input(self, note_index):
+        if note_index < 1 or note_index > len(self):
             return "Неверный индекс заметки."
         else:
             note = self.notes[note_index - 1]
-            # print('\n')
-            # print(f"Заголовок: {note.title}")
-            # print(f"Содержимое: {note.content}")
-            # print(f"Дата создания: {note.created_at.strftime('%Y-%m-%d %H:%M:%S')}")
-            return f"Заголовок: {note.title}\nСодержимое: {note.content}\nДата создания: {note.created_at.strftime('%Y-%m-%d %H:%M:%S')}"
+            return f"Заголовок: {note}\nСодержимое: {note}\nДата создания: {note('%Y-%m-%d %H:%M:%S')}"
 
-
-#  РЕДАКТИРОВАНИЕ ЗАМЕТКИ
+    
 
     # def edit_note_from_input(self):
     #     note_index = int(input("Введите индекс заметки для редактирования: "))
@@ -93,41 +106,27 @@ class NoteManager:
     #     new_content = input("Введите новое содержимое заметки: ")
     #     self.edit_note(note_index, new_title, new_content)
 
-    def edit_note(self, note_index, new_title, new_content):
-        if note_index < 1 or note_index > len(self.notes):
-            return "Неверный индекс заметки."
-        
-            # Для консольного вывода 
-            # print('\n', "Неверный индекс заметки.")
-        else:
-            note = self.notes[note_index - 1]
-            note.title = new_title
-            note.content = new_content
-            self.save_notes()
-            # Для консольного вывода
-            # print('\n', "Заметка успешно отредактирована.")
-            return "Заметка успешно отредактирована." 
+    # def edit_note(self, note_index, new_title, new_content):
+    #     if note_index < 1 or note_index > len(self.notes):
+    #         print('\n', "Неверный индекс заметки.")
+    #     else:
+    #         note = self.notes[note_index - 1]
+    #         note.title = new_title
+    #         note.content = new_content
+    #         self.save_notes()
+    #         print('\n', "Заметка успешно отредактирована.")
 
-
-    # УДАЛЕНИЕ ЗАМЕТКИ
-    
-    # Для консольного вывода
     # def delete_note_from_input(self):
     #     note_index = int(input("Введите индекс заметки для удаления: "))
     #     self.delete_note(note_index)
 
-    def delete_note(self, note_index):
-        if note_index < 1 or note_index > len(self.notes):
-            # Для консольного вывода
-            #  print('\n', "Неверный индекс заметки.")
-            return "Неверный индекс заметки."
-        else:
-            note = self.notes.pop(note_index - 1)
-            self.save_notes()
-            
-            # Для консольного вывода
-            # print('\n', f"Заметка \"{note.title}\" успешно удалена.")
-            return "Заметка \"{note.title}\" успешно удалена."
+    # def delete_note(self, note_index):
+    #     if note_index < 1 or note_index > len(self.notes):
+    #          print('\n', "Неверный индекс заметки.")
+    #     else:
+    #         note = self.notes.pop(note_index - 1)
+    #         self.save_notes()
+    #         print('\n', f"Заметка \"{note.title}\" успешно удалена.")
 
 #  ИНТЕРФЕЙС
 def ui():
@@ -157,14 +156,14 @@ def ui():
             manager.create_note(title, content)
             sg.popup('Заметка успешно создана.')
         if event == 'Вывести список заметок':
-            note_list = manager.read_selected_note()
+            note_list = manager.get_note_list()
             if isinstance(note_list, list):
                 sg.popup('\n'.join(note_list))
             else:
                 sg.popup(note_list)
         if event == 'Прочитать выбранную заметку':
             index = int(values['-INDEX-'])
-            result = manager.read_selected_note(index)
+            result = manager.read_selected_note_from_input(index)
             sg.popup(result)
         if event == 'Редактировать заметку':
             index = int(values['-INDEX-'])
