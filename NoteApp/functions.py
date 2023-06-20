@@ -1,7 +1,6 @@
 from datetime import datetime
 import PySimpleGUI as sg
 import json
-from datetime import datetime
 
 
 class Note:
