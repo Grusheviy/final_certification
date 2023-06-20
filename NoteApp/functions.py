@@ -1,5 +1,5 @@
 from datetime import datetime
-
+import json
 
 class Note:
     def __init__(self, title, content, created_at=None):
@@ -7,15 +7,18 @@ class Note:
         self.content = content
         self.created_at = created_at or datetime.now()
 
-    def to_string(self):
+    def to_dict(self):
         created_at_str = self.created_at.strftime('%Y-%m-%d %H:%M:%S')
-        return f"{self.title}\n{self.content}\n{created_at_str}\n"
+        return {
+            'title': self.title,
+            'content': self.content,
+            'created_at': created_at_str
+        }
 
     @classmethod
-    def from_string(cls, note_string):
-        note_data = note_string.strip().split('\n')
-        created_at = datetime.strptime(note_data[2], '%Y-%m-%d %H:%M:%S')
-        return cls(note_data[0], note_data[1], created_at)
+    def from_dict(cls, note_dict):
+        created_at = datetime.strptime(note_dict['created_at'], '%Y-%m-%d %H:%M:%S')
+        return cls(note_dict['title'], note_dict['content'], created_at)
 
 
 class NoteManager:
@@ -23,19 +26,22 @@ class NoteManager:
         self.file_path = file_path
         self.notes = self.load_notes()
 
+# ЗАГРУЗКА ЗАМЕТОК
     def load_notes(self):
         try:
             with open(self.file_path, 'r', encoding='utf-8') as file:
-                note_strings = file.readlines()
-                return [Note.from_string(note_string) for note_string in note_strings]
+                notes_data = json.load(file)
+                return [Note.from_dict(note_data) for note_data in notes_data]
         except FileNotFoundError:
             return []
 
+# СОХРАНЕНИЕ ЗАМЕТОК
     def save_notes(self):
-        note_strings = [note.to_string() for note in self.notes]
+        note_data = [note.to_dict() for note in self.notes]
         with open(self.file_path, 'w', encoding='utf-8') as file:
-            file.writelines(note_strings)
+            json.dump(note_data, file, indent=4)
 
+# СОЗДАНИЕ ЗАМЕТОК
     def create_note_from_input(self):
         title = input("Введите заголовок заметки: ")
         content = input("Введите содержимое заметки: ")
@@ -45,8 +51,9 @@ class NoteManager:
         note = Note(title, content)
         self.notes.append(note)
         self.save_notes()
-        print('\n',"Заметка успешно создана.")
+        print('\n', "Заметка успешно создана.")
 
+# ЧТЕНИЕ ЗАМЕТОК
     def read_notes(self):
         if not self.notes:
             print('\n', "Список заметок пуст.")
@@ -55,6 +62,7 @@ class NoteManager:
             for index, note in enumerate(self.notes):
                 print('\n', f"{index + 1}. {note.title} ({note.created_at.strftime('%Y-%m-%d %H:%M:%S')})")
 
+# ВЫБОР ЗАМЕТКИ ДЛЯ ПРОЧТЕНИЯ
     def read_selected_note_from_input(self):
         note_index = int(input("Введите индекс заметки для прочтения: "))
         self.read_selected_note(note_index)
@@ -69,12 +77,14 @@ class NoteManager:
             print(f"Содержимое: {note.content}")
             print(f"Дата создания: {note.created_at.strftime('%Y-%m-%d %H:%M:%S')}")
 
+# ВЫБОР ЗАМЕТКИ ДЛЯ РЕДАКТИРОВАНИЯ
     def edit_note_from_input(self):
         note_index = int(input("Введите индекс заметки для редактирования: "))
         new_title = input("Введите новый заголовок заметки: ")
         new_content = input("Введите новое содержимое заметки: ")
         self.edit_note(note_index, new_title, new_content)
 
+#РЕДАКТИРОВАНИЕ ЗАМЕТКИ
     def edit_note(self, note_index, new_title, new_content):
         if note_index < 1 or note_index > len(self.notes):
             print('\n', "Неверный индекс заметки.")
@@ -85,44 +95,52 @@ class NoteManager:
             self.save_notes()
             print('\n', "Заметка успешно отредактирована.")
 
+# ФУНКЦИЯ ВЫБОРА ЗАМЕТКИ ДЛЯ УДАЛЕНИЯ
     def delete_note_from_input(self):
         note_index = int(input("Введите индекс заметки для удаления: "))
         self.delete_note(note_index)
 
+# ФУНКЦИЯ УДАЛЕНИЯ ЗАМЕТКИ
     def delete_note(self, note_index):
         if note_index < 1 or note_index > len(self.notes):
-             print('\n', "Неверный индекс заметки.")
+            print('\n', "Неверный индекс заметки.")
         else:
             note = self.notes.pop(note_index - 1)
             self.save_notes()
             print('\n', f"Заметка \"{note.title}\" успешно удалена.")
 
 
-def ui():
-    file_path = 'notes.txt'
-    manager = NoteManager(file_path)
+#ИНТЕРФЕЙС
 
+def ui():
+    file_path = 'notes.json'
+    manager = NoteManager(file_path)
+    
     while True:
-        print('\n','----------------','\n')
+        print('\n', '----------------', '\n')
         print('1. Создать заметку')
         print('2. Вывести список заметок')
         print('3. Прочитать выбранную заметку')
         print('4. Редактировать заметку')
         print('5. Удалить заметку')
         print('6. Выйти')
-        print('\n','----------------','\n')
+        print('\n', '----------------', '\n')
 
         choice = input('Выберите действие: ')
-        if choice == '1':
-            manager.create_note_from_input()
-        elif choice == '2':
-            manager.read_notes()
-        elif choice == '3':
-            manager.read_selected_note_from_input()
-        elif choice == '4':
-            manager.edit_note_from_input()
-        elif choice == '5':
-            manager.delete_note_from_input()
-        elif choice == '6':
-            print('Программа завершена.')
+
+        actions = {
+            '1': manager.create_note_from_input,
+            '2': manager.read_notes,
+            '3': manager.read_selected_note_from_input,
+            '4': manager.edit_note_from_input,
+            '5': manager.delete_note_from_input,
+            '6': lambda: print('Программа завершена.')
+        }
+
+        if choice in actions:
+            actions[choice]()
+        else:
+            print('Неверный выбор. Попробуйте еще раз.')
+
+        if choice == '6':
             break
